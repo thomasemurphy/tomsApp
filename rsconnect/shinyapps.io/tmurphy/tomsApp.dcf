@@ -1,0 +1,13 @@
+name: tomsApp
+title: tomsApp
+username:
+account: tmurphy
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2290306
+bundleId: 3140351
+url: https://tmurphy.shinyapps.io/tomsApp/
+when: 1589346449.6346
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .RData|howToGuide.html|howToGuide.Rmd

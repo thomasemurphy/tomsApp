@@ -1,0 +1,81 @@
+---
+title: "NBA Playoff Pool, hosted by Me Tom Your Host"
+subtitle: "A Shiny web app to explore Pool results from 2015-2019"
+author: "Tom Murphy"
+date: "5/12/2020"
+output: slidy_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r echo=FALSE}
+library(ggplot2)
+library(reshape)
+```
+
+## Background
+
+The NBA Playoff Pool began in 2015 as a way for a group of friends to test their prediction skills on the results of the NBA Playoffs. For each round of the playoffs, each player in the Pool picks the winner of each series, as well as the number of games that series will go. The player is then awarded points based on how close their prediction was. For example, if a player picks the Bulls to beat the Bucks in 6 games, they get the maximum number of points if the Bulls win in 6, a smaller amount of points if the Bulls win in 7, a smaller yet number of points if the Bucks win in 7, etc. Players re-pick for each round of the playoffs. The player with the most points at the end of the Finals wins the Pool.
+
+The Pool is hosted by Me, Tom, Your Host.
+
+## Exploring Pool History with a Shiny Web App
+
+I made a Shiny web app to display past Pool results in an interactive way. The functionality of the web app is pretty self-explanatory. The user selects the year of interest, and whether to display the results as a table or a chart. Those selections are then passed to the server side, which passes back the correct table or (gg)plot.
+
+## R code for making the chart output
+
+The code below runs on the server side of the Shiny app. The only difference between the code chunk below and the code on the server side is the `input` value, which is hard coded below but passed from the ui side in the app.
+
+The output of the code below is a ggplot object, which is then rendered on the ui side. The rendered output is shown on the next slide.
+
+```{r echo = TRUE, eval=FALSE}
+input <- list("year"=2015)
+all_years_data <- read.csv("data/all_years_leaderboard.csv")
+all_years_data[is.na(all_years_data[,])] <- 0
+all_years_data$Total <- all_years_data$Round1 + all_years_data$Round2 +
+    all_years_data$Round3 + all_years_data$Finals
+this_year_data <- subset(all_years_data, Year==input$year)
+this_year_data[,1] <- 1:nrow(this_year_data)
+this_year_data <- this_year_data[,-2]
+names(this_year_data) <- c("Rank", "Name", "Round 1", "Round 2", "Round 3", "Finals", "Total")
+this_year_data$Name <- reorder(this_year_data$Name, this_year_data$Total)
+data_for_ggp <- melt(subset(this_year_data, select=-Total), id=c("Rank", "Name"))
+ggplot(data_for_ggp, aes(x=Name, y=value, fill=variable, label=value)) +
+  geom_bar(stat="identity", position = position_stack(reverse = TRUE)) +
+  xlab("") +
+  ylab("") +
+  coord_flip() +
+  geom_text(size = 2, position = position_stack(vjust=0.5, reverse=TRUE)) +
+  scale_fill_brewer(palette="Blues") +
+  theme(legend.position = "top", legend.title=element_blank())
+```
+
+## Example chart output
+
+The chart below shows results from 2015, the first year of the Pool. The chart is generated using the code on the previous slide.
+
+```{r echo=FALSE, eval=TRUE}
+input <- list("year"=2015)
+all_years_data <- read.csv("data/all_years_leaderboard.csv")
+all_years_data[is.na(all_years_data[,])] <- 0
+all_years_data$Total <- all_years_data$Round1 + all_years_data$Round2 +
+    all_years_data$Round3 + all_years_data$Finals
+this_year_data <- subset(all_years_data, Year==input$year)
+this_year_data[,1] <- 1:nrow(this_year_data)
+this_year_data <- this_year_data[,-2]
+names(this_year_data) <- c("Rank", "Name", "Round 1", "Round 2", "Round 3", "Finals", "Total")
+this_year_data$Name <- reorder(this_year_data$Name, this_year_data$Total)
+data_for_ggp <- melt(subset(this_year_data, select=-Total), id=c("Rank", "Name"))
+ggplot(data_for_ggp, aes(x=Name, y=value, fill=variable, label=value)) +
+  geom_bar(stat="identity", position = position_stack(reverse = TRUE)) +
+  xlab("") +
+  ylab("") +
+  coord_flip() +
+  geom_text(size = 2, position = position_stack(vjust=0.5, reverse=TRUE)) +
+  scale_fill_brewer(palette="Blues") +
+  theme(legend.position = "top", legend.title=element_blank())
+```
+
